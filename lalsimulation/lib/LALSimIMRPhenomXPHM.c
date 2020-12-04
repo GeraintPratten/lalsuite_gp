@@ -1006,8 +1006,7 @@ int XLALSimIMRPhenomXPHMFromModes(
                REAL8 Mf = coarseFreqs->data[j];
                const REAL8 v        = cbrt (LAL_PI * Mf * (2.0 / emmprime) );
                const vector vangles = IMRPhenomX_Return_phi_zeta_costhetaL_MSA(v,pWF,pPrec);
-               //REAL8 beta  = 0.0;
-               REAL8 cos_beta  = 0.0;
+               REAL8 cos_beta       = 0.0;
 
                /* Get the offset for the Euler angles alpha and epsilon. */
                REAL8 alpha_offset_mprime = 0, epsilon_offset_mprime = 0;
@@ -1015,10 +1014,6 @@ int XLALSimIMRPhenomXPHMFromModes(
 
                valpha[j]   = vangles.x - alpha_offset_mprime;
                vepsilon[j] = vangles.y - epsilon_offset_mprime;
-
-               //beta        = acos(vangles.z);
-               //cBetah      = cos(beta/2.);
-               //sBetah      = sin(beta/2.);
                cos_beta    = vangles.z;
 
                status = IMRPhenomXWignerdCoefficients_cosbeta(&cBetah, &sBetah, cos_beta);
@@ -1372,8 +1367,7 @@ static int IMRPhenomXPHMTwistUp(
         /* Get Euler angles. */
         const double v        = cbrt (LAL_PI * Mf * (2.0 / mprime) );
         const vector vangles  = IMRPhenomX_Return_phi_zeta_costhetaL_MSA(v,pWF,pPrec);
-        //double beta               = 0.0;
-        double cos_beta = 0.0;
+        double cos_beta       = 0.0;
 
         /* Get the offset for the Euler angles alpha and epsilon. */
         REAL8 alpha_offset_mprime = 0, epsilon_offset_mprime = 0;
@@ -1381,15 +1375,10 @@ static int IMRPhenomXPHMTwistUp(
 
         alpha       = vangles.x - alpha_offset_mprime;
         epsilon     = vangles.y - epsilon_offset_mprime;
-
-        //beta        = acos(vangles.z);
-        //cBetah      = cos(beta/2.);
-        //sBetah      = sin(beta/2.);
-
         cos_beta    = vangles.z;
 
-        int status = 0;
-        status = IMRPhenomXWignerdCoefficients_cosbeta(&cBetah, &sBetah, cos_beta);
+        int status  = 0;
+        status      = IMRPhenomXWignerdCoefficients_cosbeta(&cBetah, &sBetah, cos_beta);
         XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "Call to IMRPhenomXWignerdCoefficients_cosbeta failed.");
 
 
@@ -2409,22 +2398,17 @@ static int IMRPhenomXPHMTwistUpOneMode(
       /* ~~~~~ Euler Angles from Chatziioannou et al, PRD 95, 104004, (2017)  ~~~~~ */
       const double v            = cbrt(LAL_PI * Mf * (2.0/mprime) );
       const vector vangles      = IMRPhenomX_Return_phi_zeta_costhetaL_MSA(v,pWF,pPrec);
-      //double beta               = 0.0;
-      double cos_beta = 0.0;
+      double cos_beta           = 0.0;
 
       REAL8 alpha_offset_mprime = 0, epsilon_offset_mprime = 0;
       Get_alpha_epsilon_offset(&alpha_offset_mprime, &epsilon_offset_mprime, mprime, pPrec);
 
       alpha    = vangles.x - alpha_offset_mprime;
       epsilon  = vangles.y - epsilon_offset_mprime;
-      //beta     = acos(vangles.z);
-      //cBetah   = cos(beta/2.0);
-      //sBetah   = sin(beta/2.0);
-
-      cos_beta    = vangles.z;
+      cos_beta = vangles.z;
 
       int status = 0;
-      status = IMRPhenomXWignerdCoefficients_cosbeta(&cBetah, &sBetah, cos_beta);
+      status     = IMRPhenomXWignerdCoefficients_cosbeta(&cBetah, &sBetah, cos_beta);
       XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "Call to IMRPhenomXWignerdCoefficients_cosbeta failed.");
 
 

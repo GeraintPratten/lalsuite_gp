@@ -1814,7 +1814,7 @@ int XLALSimIMRPhenomXPGenerateFD(
      s        = pPrec->Sperp / (L + pPrec->SL);
      s2       = s*s;
 
-     (*cosbeta_of_f).data[i]    = 1.0 / sqrt(1.0 + s2);
+     (*cosbeta_of_f).data[i]    = copysign(1.0, L + pPrec->SL) / sqrt(1.0 + s2);
    }
 
    LALFree(pPrec);
