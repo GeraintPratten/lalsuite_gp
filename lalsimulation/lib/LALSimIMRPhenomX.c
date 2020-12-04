@@ -1583,7 +1583,7 @@ int XLALSimIMRPhenomXPGenerateFD(
   REAL8 fRef_In,             /**< Reference frequency (Hz) */
   REAL8 f_min_In,            /**< Minimum frequency (Hz)   */
   REAL8 f_max_In,            /**< Maximum frequency (Hz)   */
-  INT4 mprime,
+  INT4 mprime,               /**< Spherical harmonic order m */
   LALDict *lalParams         /**< LAL Dictionary struct */
 )
 {
@@ -1704,6 +1704,9 @@ int XLALSimIMRPhenomXPGenerateFD(
   REAL8 chi2y,                              /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
   REAL8 chi2z,                              /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
   REAL8 fRef_In,                            /**< Reference frequency (Hz) */
+  REAL8 f_min_In,            /**< Minimum frequency (Hz)   */
+  REAL8 f_max_In,            /**< Maximum frequency (Hz)   */
+  INT4 mprime,               /**< Spherical harmonic order m */
   LALDict *lalParams                        /**< LAL Dictionary struct */
 )
 {
@@ -1740,19 +1743,20 @@ int XLALSimIMRPhenomXPGenerateFD(
    /* If fRef is not provided, then set fRef to be the starting GW Frequency */
    const REAL8 fRef = (fRef_In == 0.0) ? freqs->data[0] : fRef_In;
 
-   const REAL8 f_min_In  = freqs->data[0];
-   const REAL8 f_max_In  = freqs->data[freqs->length - 1];
+   //const REAL8 f_min_In  = freqs->data[0];
+   //const REAL8 f_max_In  = freqs->data[freqs->length - 1];
 
-    /* Use an auxiliar laldict to not overwrite the input argument */
-    LALDict *lalParams_aux;
-    /* setup mode array */
-    if (lalParams == NULL)
-    {
-        lalParams_aux = XLALCreateDict();
-    }
-    else{
-        lalParams_aux = XLALDictDuplicate(lalParams);
-    }
+   /* Use an auxiliar laldict to not overwrite the input argument */
+   LALDict *lalParams_aux;
+   /* setup mode array */
+   if (lalParams == NULL)
+   {
+     lalParams_aux = XLALCreateDict();
+   }
+   else
+   {
+     lalParams_aux = XLALDictDuplicate(lalParams);
+   }
 
    /* Initialize IMRPhenomX waveform struct and perform sanity check. */
    IMRPhenomXWaveformStruct *pWF;
@@ -1794,7 +1798,7 @@ int XLALSimIMRPhenomXPGenerateFD(
      f           = ((*freqs).data[i]);
 
      /* Orbital frequency and velocity */
-     omega       = f * pPrec->piGM;
+     omega       = f * pPrec->piGM * (2.0 / mprime);
      logomega    = log(omega);
      omega_cbrt  = cbrt(omega);
      omega_cbrt2 = omega_cbrt * omega_cbrt;
