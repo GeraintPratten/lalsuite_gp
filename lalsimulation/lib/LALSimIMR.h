@@ -442,6 +442,9 @@ int XLALSimIMRPhenomXPMSAAngles(
  const REAL8 chi2y,                        /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
  const REAL8 chi2z,                        /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
  const REAL8 fRef_In,                      /**< Reference frequency (Hz) */
+ const REAL8 f_min_In,                     /**< Minimum frequency (Hz) */
+ const REAL8 f_max_In,                     /**< Maximum frequency (Hz) */
+ const INT4 mprime,
  LALDict *lalParams                        /**< LAL Dictionary struct */
 );
 
