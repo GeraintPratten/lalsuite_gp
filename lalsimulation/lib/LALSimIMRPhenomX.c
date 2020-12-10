@@ -1676,7 +1676,7 @@ int XLALSimIMRPhenomXPGenerateFD(
 
    LALFree(pPrec);
    LALFree(pWF);
-   XLALDestroyDict(lalParams);
+   XLALDestroyDict(lalParams_aux);
 
    return XLAL_SUCCESS;
  }
