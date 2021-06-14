@@ -1,0 +1,1 @@
+../../swig/generate_swig_iface.py
