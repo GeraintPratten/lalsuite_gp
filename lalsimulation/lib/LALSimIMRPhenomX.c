@@ -854,7 +854,7 @@ int XLALSimIMRPhenomXPGenerateFD(
 
   /* If no reference frequency is given, set it to the starting gravitational wave frequency */
   const REAL8 fRef = (fRef_In == 0.0) ? f_min : fRef_In;
-  
+
   /* Use an auxiliar laldict to not overwrite the input argument */
   LALDict *lalParams_aux;
   /* setup mode array */
@@ -1044,7 +1044,7 @@ int XLALSimIMRPhenomXPGenerateFD(
 
    const REAL8 f_min_In  = freqs->data[0];
    const REAL8 f_max_In  = freqs->data[freqs->length - 1];
-   
+
    /* Use an auxiliar laldict to not overwrite the input argument */
    LALDict *lalParams_aux;
    /* setup mode array */
@@ -1166,7 +1166,7 @@ int XLALSimIMRPhenomXPGenerateFD(
      else{
          lalParams_aux = XLALDictDuplicate(lalParams);
      }
-     
+
      /* Check if m1 > m2, swap the bodies otherwise. */
      INT4 status = XLALIMRPhenomXPCheckMassesAndSpins(&m1_SI,&m2_SI,&chi1x,&chi1y,&chi1z,&chi2x,&chi2y,&chi2z);
      XLAL_CHECK(XLAL_SUCCESS == status, XLAL_EFUNC, "Error: XLALIMRPhenomXPCheckMassesAndSpins failed.\n");
@@ -1222,7 +1222,6 @@ int XLALSimIMRPhenomXPGenerateFD(
 
  /*
   *  Prototype wrapper function:
-
   *  Driver routine to calculate the MSA Euler angles in the frequency domain.
   *
   *  All input parameters should be in SI units.
@@ -1243,7 +1242,10 @@ int XLALSimIMRPhenomXPGenerateFD(
   REAL8 chi2y,               /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
   REAL8 chi2z,               /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
   REAL8 fRef_In,             /**< Reference frequency (Hz) */
-  LALDict *lalParams               /**< LAL Dictionary struct */
+  REAL8 f_min_In,            /**< Minimum frequency (Hz)   */
+  REAL8 f_max_In,            /**< Maximum frequency (Hz)   */
+  INT4 mprime,               /**< Spherical harmonic order m */
+  LALDict *lalParams         /**< LAL Dictionary struct */
 )
 {
    /*
@@ -1268,19 +1270,19 @@ int XLALSimIMRPhenomXPGenerateFD(
    /* If fRef is not provided, then set fRef to be the starting GW Frequency */
    const REAL8 fRef = (fRef_In == 0.0) ? freqs->data[0] : fRef_In;
 
-   const REAL8 f_min_In  = freqs->data[0];
-   const REAL8 f_max_In  = freqs->data[freqs->length - 1];
-   
-   /* Use an auxiliar laldict to not overwrite the input argument */
-    LALDict *lalParams_aux;
-    /* setup mode array */
-    if (lalParams == NULL)
-    {
-        lalParams_aux = XLALCreateDict();
-    }
-    else{
-        lalParams_aux = XLALDictDuplicate(lalParams);
-    }
+   //const REAL8 f_min_In  = freqs->data[0];
+   //const REAL8 f_max_In  = freqs->data[freqs->length - 1];
+
+   /* Use an auxiliary laldict to avoid overwriting the input dictionary */
+   LALDict *lalParams_aux;
+   if (lalParams == NULL)
+   {
+     lalParams_aux = XLALCreateDict();
+   }
+   else
+   {
+     lalParams_aux = XLALDictDuplicate(lalParams);
+   }
 
    /* Initialize IMRPhenomX waveform struct and perform sanity check. */
    IMRPhenomXWaveformStruct *pWF;
@@ -1293,8 +1295,7 @@ int XLALSimIMRPhenomXPGenerateFD(
    IMRPhenomXPrecessionStruct *pPrec;
    pPrec  = XLALMalloc(sizeof(IMRPhenomXPrecessionStruct));
 
-   int pflag     = XLALSimInspiralWaveformParamsLookupPhenomXPrecVersion(lalParams_aux);
-   if (pflag == 300) pflag = 223;
+   const int pflag     = XLALSimInspiralWaveformParamsLookupPhenomXPrecVersion(lalParams_aux);
 
    if(pflag != 220 && pflag != 221 && pflag != 222 && pflag != 223 && pflag != 224)
    {
@@ -1326,7 +1327,7 @@ int XLALSimIMRPhenomXPGenerateFD(
      // v     = cbrt( ((*freqs).data[i]) * pPrec->twopiGM );
 
      // Input list of *gravitational-wave* frequencies not *orbital* frequencies*
-     v       = cbrt( ((*freqs).data[i]) * pPrec->piGM );
+     v       = cbrt( ((*freqs).data[i]) * pPrec->piGM * (2.0 / mprime) );
      vangles = IMRPhenomX_Return_phi_zeta_costhetaL_MSA(v,pWF,pPrec);
 
      (*phiz_of_f).data[i]      = vangles.x - pPrec->alpha_offset;
@@ -1336,14 +1337,13 @@ int XLALSimIMRPhenomXPGenerateFD(
 
    LALFree(pPrec);
    LALFree(pWF);
-   XLALDestroyDict(lalParams);
+   XLALDestroyDict(lalParams_aux);
 
    return XLAL_SUCCESS;
  }
 
  /*
   *  Prototype wrapper function:
-
   *  Driver routine to calculate the NNLO PN Euler angles in the frequency domain.
   *
   *  All input parameters should be in SI units.
@@ -1364,6 +1364,9 @@ int XLALSimIMRPhenomXPGenerateFD(
   REAL8 chi2y,                              /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
   REAL8 chi2z,                              /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
   REAL8 fRef_In,                            /**< Reference frequency (Hz) */
+  REAL8 f_min_In,            /**< Minimum frequency (Hz)   */
+  REAL8 f_max_In,            /**< Maximum frequency (Hz)   */
+  INT4 mprime,               /**< Spherical harmonic order m */
   LALDict *lalParams                        /**< LAL Dictionary struct */
 )
 {
@@ -1400,19 +1403,20 @@ int XLALSimIMRPhenomXPGenerateFD(
    /* If fRef is not provided, then set fRef to be the starting GW Frequency */
    const REAL8 fRef = (fRef_In == 0.0) ? freqs->data[0] : fRef_In;
 
-   const REAL8 f_min_In  = freqs->data[0];
-   const REAL8 f_max_In  = freqs->data[freqs->length - 1];
-   
-    /* Use an auxiliar laldict to not overwrite the input argument */
-    LALDict *lalParams_aux;
-    /* setup mode array */
-    if (lalParams == NULL)
-    {
-        lalParams_aux = XLALCreateDict();
-    }
-    else{
-        lalParams_aux = XLALDictDuplicate(lalParams);
-    }
+   //const REAL8 f_min_In  = freqs->data[0];
+   //const REAL8 f_max_In  = freqs->data[freqs->length - 1];
+
+   /* Use an auxiliar laldict to not overwrite the input argument */
+   LALDict *lalParams_aux;
+   /* setup mode array */
+   if (lalParams == NULL)
+   {
+     lalParams_aux = XLALCreateDict();
+   }
+   else
+   {
+     lalParams_aux = XLALDictDuplicate(lalParams);
+   }
 
    /* Initialize IMRPhenomX waveform struct and perform sanity check. */
    IMRPhenomXWaveformStruct *pWF;
@@ -1454,7 +1458,7 @@ int XLALSimIMRPhenomXPGenerateFD(
      f           = ((*freqs).data[i]);
 
      /* Orbital frequency and velocity */
-     omega       = f * pPrec->piGM;
+     omega       = f * pPrec->piGM * (2.0 / mprime);
      logomega    = log(omega);
      omega_cbrt  = cbrt(omega);
      omega_cbrt2 = omega_cbrt * omega_cbrt;
